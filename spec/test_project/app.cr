@@ -1,3 +1,3 @@
-class MartenMarkdownSpecApp < Marten::App
-  label :marten_markdown_spec
+class MartenTextSpecApp < Marten::App
+  label :marten_text_spec
 end

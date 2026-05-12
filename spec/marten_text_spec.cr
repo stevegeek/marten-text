@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe MartenMarkdown do
+describe MartenText do
   describe "the has_markdown macro" do
     it "autobuilds a markdown row pointing at the host record when accessed unset" do
       note = Note.create!(title: "fresh")
@@ -50,7 +50,7 @@ describe MartenMarkdown do
     end
   end
 
-  describe MartenMarkdown::Renderable do
+  describe MartenText::Renderable do
     it "to_html renders markdown through the renderer pipeline" do
       note = Note.create!(title: "render me")
       note.body = "# hi"
@@ -68,17 +68,17 @@ describe MartenMarkdown do
     end
   end
 
-  describe MartenMarkdown::Renderer do
+  describe MartenText::Renderer do
     it "calls the configured image_wrapper for top-level images" do
       seen = [] of {String, String, String?}
-      MartenMarkdown.configure do |c|
+      MartenText.configure do |c|
         c.image_wrapper = ->(url : String, alt : String, title : String?) {
           seen << {url, alt, title}
           %(<figure data-test="wrapped"><img src="#{url}" alt="#{alt}"></figure>)
         }
       end
 
-      html = MartenMarkdown::Renderer.render(%(![cat](https://x/y.png "kitten")))
+      html = MartenText::Renderer.render(%(![cat](https://x/y.png "kitten")))
       seen.size.should eq 1
       seen[0][0].should eq "https://x/y.png"
       seen[0][1].should eq "cat"
@@ -88,14 +88,14 @@ describe MartenMarkdown do
 
     it "calls the configured heading_anchor for every heading and dedupes ids" do
       seen = [] of {String, String, String}
-      MartenMarkdown.configure do |c|
+      MartenText.configure do |c|
         c.heading_anchor = ->(level : String, text : String, id : String) {
           seen << {level, text, id}
           %(<#{level} data-id="#{id}">#{text}</#{level}>)
         }
       end
 
-      html = MartenMarkdown::Renderer.render("# alpha\n\n## beta\n\n## beta\n")
+      html = MartenText::Renderer.render("# alpha\n\n## beta\n\n## beta\n")
       seen.size.should eq 3
       seen[0][0].should eq "h1"
       seen[0][2].should eq "alpha"
@@ -106,17 +106,17 @@ describe MartenMarkdown do
     end
 
     it "default image hook emits a passthrough <img>" do
-      html = MartenMarkdown::Renderer.render(%(![cat](/u.png)))
+      html = MartenText::Renderer.render(%(![cat](/u.png)))
       html.should contain %(<img src="/u.png" alt="cat">)
     end
 
     it "default heading hook emits a plain heading with an id" do
-      html = MartenMarkdown::Renderer.render("# Hello World")
+      html = MartenText::Renderer.render("# Hello World")
       html.should contain %(<h1 id="hello-world">Hello World</h1>)
     end
 
     it "highlights fenced code via tartrazine when a known language is set" do
-      html = MartenMarkdown::Renderer.render("```ruby\nputs :hi\n```\n")
+      html = MartenText::Renderer.render("```ruby\nputs :hi\n```\n")
       # Tartrazine emits highlighting spans with classes; we don't care
       # about specific tokens, just that something richer than the raw
       # <pre><code> got produced.
@@ -125,7 +125,7 @@ describe MartenMarkdown do
     end
 
     it "falls back to a bare <pre><code> for unknown languages" do
-      html = MartenMarkdown::Renderer.render("```nosuchlang\nfoo\n```\n")
+      html = MartenText::Renderer.render("```nosuchlang\nfoo\n```\n")
       html.should contain "<pre><code"
       html.should contain "foo"
     end

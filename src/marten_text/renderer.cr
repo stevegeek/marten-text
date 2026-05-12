@@ -1,4 +1,4 @@
-module MartenMarkdown
+module MartenText
   # Markdown → HTML pipeline:
   #   1. markd (CommonMark) → HTML.
   #   2. tartrazine syntax-highlight on fenced code blocks.
@@ -6,13 +6,13 @@ module MartenMarkdown
   #   4. host-supplied `heading_anchor` over every `<h1>`–`<h6>`, with
   #      slug-based IDs deduplicated within the render call.
   #
-  # The two host-supplied hooks live on `MartenMarkdown.configuration`;
+  # The two host-supplied hooks live on `MartenText.configuration`;
   # see `Configuration`.
   module Renderer
     extend self
 
     def render(source : String) : String
-      cfg = MartenMarkdown.configuration
+      cfg = MartenText.configuration
       html = Markd.to_html(source, cfg.markd_options)
       html = highlight_code_blocks(html, cfg.syntax_theme)
       html = wrap_images(html, cfg.image_wrapper)

@@ -1,4 +1,4 @@
-module MartenMarkdown
+module MartenText
   # Render-time hooks. The renderer pipeline (CommonMark → tartrazine →
   # image-wrap → heading-anchor) is fixed; the *markup* emitted by the
   # image-wrap and heading-anchor passes is supplied by the host so the
@@ -7,7 +7,7 @@ module MartenMarkdown
   #
   # Configure once at app boot:
   #
-  #   MartenMarkdown.configure do |c|
+  #   MartenText.configure do |c|
   #     c.image_wrapper = ->(url : String, alt : String, title : String?) {
   #       %(<a href="#{url}"><img src="#{url}" alt="#{alt}"></a>)
   #     }

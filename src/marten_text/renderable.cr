@@ -1,6 +1,6 @@
-module MartenMarkdown
+module MartenText
   # Mixin for the host's concrete Markdown row model. Provides:
-  #   - `to_html` — render `content` through `MartenMarkdown::Renderer`.
+  #   - `to_html` — render `content` through `MartenText::Renderer`.
   #   - `plain_text` — strip tags from the rendered HTML (suitable for
   #     full-text indexing).
   #
@@ -8,7 +8,7 @@ module MartenMarkdown
   # variant) field for these to compile. Typical shape:
   #
   #   class Books::Markdown < Marten::Model
-  #     include MartenMarkdown::Renderable
+  #     include MartenText::Renderable
   #
   #     field :id, :big_int, primary_key: true, auto: true
   #     field :record, :polymorphic, to: [Page, Section], related: :markdowns
@@ -17,7 +17,7 @@ module MartenMarkdown
   #   end
   module Renderable
     def to_html : String
-      ::MartenMarkdown::Renderer.render(content || "")
+      ::MartenText::Renderer.render(content || "")
     end
 
     def plain_text : String

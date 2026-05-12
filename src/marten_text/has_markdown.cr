@@ -1,4 +1,4 @@
-module MartenMarkdown
+module MartenText
 end
 
 # `has_markdown :body, model: ::Books::Markdown` on a Marten::Model
@@ -15,7 +15,7 @@ end
 #
 # The `model:` argument must be the concrete Marten::Model class the
 # host defined for storing markdown rows — typically including
-# `MartenMarkdown::Renderable` and declaring a polymorphic `record`
+# `MartenText::Renderable` and declaring a polymorphic `record`
 # field whose `to:` list includes the calling model.
 #
 # Why the macro accepts the model class instead of hardcoding one:

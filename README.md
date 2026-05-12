@@ -1,24 +1,23 @@
-# marten_markdown
+# marten_text
 
-A Crystal shard for [Marten](https://martenframework.com) that ports
-Rails Writebook's `has_markdown` / `MarkdownRenderer` stack — the
-ActionText-Markdown analog — to Marten.
+A Crystal shard for [Marten](https://martenframework.com) — the Marten
+analog of Rails' [ActionText](https://guides.rubyonrails.org/action_text_overview.html)
+framework feature.
 
-Rails Writebook patches ActionText to render Markdown via
-`lib/rails_ext/action_text_markdown.rb`. Marten has no equivalent
-framework hook, so this shard provides the same surface as a small,
-self-contained package: a `has_markdown :body` macro on
-`Marten::Model`, a configurable `MartenMarkdown::Renderer` pipeline
-(CommonMark → tartrazine → image-wrap → heading-anchor), and a
-`MartenMarkdown::Renderable` mixin for the host's concrete Markdown
-row model.
+Provides the same shape as ActionText (polymorphic content row with a
+`has_*` macro on the host model, render pipeline + plain-text extraction)
+with Markdown as the body format instead of Trix HTML. The pipeline runs
+CommonMark via [`markd`](https://github.com/icyleaf/markd) and syntax
+highlighting via [`tartrazine`](https://github.com/ralsina/tartrazine);
+the two UI-facing pieces (image wrapping, heading anchors) are
+configurable so the host app's CSS / Stimulus hooks stay in the host.
 
 ## Installation
 
 ```yaml
 dependencies:
-  marten_markdown:
-    github: stevegeek/marten-markdown
+  marten_text:
+    github: stevegeek/marten-text
 ```
 
 Then `shards install`.
@@ -32,7 +31,7 @@ can't ship a usable polymorphic table — your app owns it:
 
 ```crystal
 class Markdown < Marten::Model
-  include MartenMarkdown::Renderable
+  include MartenText::Renderable
 
   field :id, :big_int, primary_key: true, auto: true
   field :record, :polymorphic, to: [Page, Section], related: :markdowns
@@ -68,7 +67,7 @@ The renderer ships with sensible defaults but the two UI-facing pieces
 CSS class names / Stimulus hooks live in your app, not in the shard:
 
 ```crystal
-MartenMarkdown.configure do |c|
+MartenText.configure do |c|
   c.image_wrapper = ->(url : String, alt : String, title : String?) {
     %(<a data-action="lightbox#open:prevent" href="#{url}">) +
     %(<img src="#{url}" alt="#{alt}"></a>)
@@ -82,18 +81,18 @@ end
 
 You can also tweak `c.markd_options` and `c.syntax_theme` (any tartrazine theme name).
 
-## Why a shard?
+## Relationship to ActionText
 
-Rails Writebook bolts Markdown rendering onto ActionText via a
-monkey-patch (`lib/rails_ext/action_text_markdown.rb` and friends). The
-Marten port keeps the same shape — `has_markdown` macro + polymorphic
-storage row + render pipeline — but lives in its own shard because:
+| ActionText (Rails) | marten_text |
+|---|---|
+| `has_rich_text :body` | `has_markdown :body, model: ...` |
+| `ActionText::RichText` model (HTML in `body` column) | host-defined polymorphic content row including `MartenText::Renderable` (markdown in `content` column) |
+| Trix editor frontend | not bundled (host app picks an editor — e.g. `<house-md>`, `<trix-editor>`, plain `<textarea>`) |
+| Embed/attachment expansion via SGID | not yet implemented |
+| `to_plain_text` (HTML → text) | `plain_text` (markdown → text) |
+| Sanitization on render | none (markdown is the source; rendering controls allowed HTML) |
 
-- Marten has no built-in rich-text equivalent to patch onto.
-- The render pipeline is reusable across any Marten app that wants
-  CommonMark → syntax-highlighted HTML.
-- Keeping it separate lets the host model own the polymorphic `to:`
-  list, which Marten requires at compile time.
+The host owns the polymorphic content model because Marten's `field :polymorphic, to: [...]` list is fixed at compile time, so the shard can't ship a usable polymorphic table itself.
 
 ## Development
 

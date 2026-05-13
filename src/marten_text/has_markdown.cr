@@ -54,5 +54,40 @@ class Marten::Model
       m.content = content
       m.save!
     end
+
+    # Bulk-preload the {{ name.id }} markdown rows for an array of records,
+    # warming each record's instance-level cache so subsequent calls to
+    # `{{ name.id }}` don't hit the database. Mirrors ActiveRecord's
+    # association preloader: one IN-clause SELECT covers the whole batch.
+    #
+    # Use this when rendering many records in a loop (e.g. a book's
+    # leaves) to collapse N markdown queries into 1.
+    def self.preload_{{ name.id }}(records : Enumerable({{ klass.id }})) : ::Nil
+      pks = records.compact_map(&.pk).map(&.to_s)
+      return if pks.empty?
+
+      by_record_id = {} of String => {{ model.id }}
+      {{ model.id }}
+        .filter(record_type: {{ klass.stringify }}, name: {{ name.id.stringify }})
+        .filter(record_id__in: pks)
+        .each { |m| by_record_id[m.record_id.to_s] = m }
+
+      records.each do |r|
+        pk = r.pk
+        found = pk.nil? ? nil : by_record_id[pk.to_s]?
+        r.__preload_markdown_{{ name.id }}(found)
+      end
+    end
+
+    # Internal: assigns the per-instance cache slot. Public because the
+    # class-level `preload_{{ name.id }}` helper above needs to reach
+    # across instances; not part of the public API.
+    def __preload_markdown_{{ name.id }}(record : {{ model.id }}?) : ::Nil
+      @__markdown_{{ name.id }} = record || {{ model.id }}.new.tap do |new_md|
+        new_md.record = self
+        new_md.name = {{ name.id.stringify }}
+        new_md.content = ""
+      end
+    end
   end
 end

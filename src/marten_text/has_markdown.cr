@@ -66,16 +66,32 @@ class Marten::Model
       pks = records.compact_map(&.pk).map(&.to_s)
       return if pks.empty?
 
-      by_record_id = {} of String => {{ model.id }}
-      {{ model.id }}
+      t_query = ::Time.monotonic
+      rows = {{ model.id }}
         .filter(record_type: {{ klass.stringify }}, name: {{ name.id.stringify }})
         .filter(record_id__in: pks)
-        .each { |m| by_record_id[m.record_id.to_s] = m }
+        .to_a
+      query_ms = (::Time.monotonic - t_query).total_milliseconds
 
+      t_hash = ::Time.monotonic
+      by_record_id = ::Hash(::String, {{ model.id }}).new(initial_capacity: rows.size)
+      rows.each { |m| by_record_id[m.record_id.to_s] = m }
+      hash_ms = (::Time.monotonic - t_hash).total_milliseconds
+
+      t_assign = ::Time.monotonic
       records.each do |r|
         pk = r.pk
         found = pk.nil? ? nil : by_record_id[pk.to_s]?
         r.__preload_markdown_{{ name.id }}(found)
+      end
+      assign_ms = (::Time.monotonic - t_assign).total_milliseconds
+
+      if ENV["PROFILE"]?
+        ::Log.info {
+          "preload_{{ name.id }} query=#{query_ms.round(2)}ms " \
+          "hash=#{hash_ms.round(2)}ms assign=#{assign_ms.round(2)}ms " \
+          "rows=#{rows.size} records=#{pks.size}"
+        }
       end
     end
 

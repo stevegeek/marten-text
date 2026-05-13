@@ -27,28 +27,26 @@ class Marten::Model
   macro has_markdown(name, model)
     {% klass = @type %}
 
+    @__markdown_{{ name.id }} : ({{ model.id }})?
+
     def {{ name.id }} : {{ model.id }}
+      cached = @__markdown_{{ name.id }}
+      return cached if cached
       m = {{ model.id }}
         .filter(record_type: {{ klass.stringify }}, record_id: pk)
         .filter(name: {{ name.id.stringify }})
         .first
-      if m
-        m
-      else
-        {{ model.id }}.new.tap do |new_md|
-          new_md.record = self
-          new_md.name = {{ name.id.stringify }}
-          new_md.content = ""
-        end
+      result = m || {{ model.id }}.new.tap do |new_md|
+        new_md.record = self
+        new_md.name = {{ name.id.stringify }}
+        new_md.content = ""
       end
+      @__markdown_{{ name.id }} = result
+      result
     end
 
     def {{ name.id }}? : ::Bool
-      m = {{ model.id }}
-        .filter(record_type: {{ klass.stringify }}, record_id: pk)
-        .filter(name: {{ name.id.stringify }})
-        .first
-      !m.nil? && !m.content.try(&.empty?)
+      !{{ name.id }}.content.try(&.empty?)
     end
 
     def {{ name.id }}=(content : ::String) : ::Nil

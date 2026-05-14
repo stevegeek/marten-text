@@ -55,6 +55,21 @@ class Marten::Model
       m.save!
     end
 
+    # Build + save a fresh {{ name.id }} markdown row in a single INSERT,
+    # skipping the find-or-build SELECT that `{{ name.id }}=` performs.
+    # The caller's responsibility to use this only when the parent record
+    # is known to have no existing markdown for this attribute (typical
+    # on a just-created leafable). Mirrors ActiveRecord's
+    # `create_<name>!` association method.
+    def create_{{ name.id }}!(content : ::String) : ::Nil
+      m = {{ model.id }}.new
+      m.record = self
+      m.name = {{ name.id.stringify }}
+      m.content = content
+      m.save!
+      @__markdown_{{ name.id }} = m
+    end
+
     # Bulk-preload the {{ name.id }} markdown rows for an array of records,
     # warming each record's instance-level cache so subsequent calls to
     # `{{ name.id }}` don't hit the database. Mirrors ActiveRecord's

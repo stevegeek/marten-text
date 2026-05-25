@@ -23,5 +23,10 @@ Marten.configure :test do |config|
 end
 
 Spec.before_each do
-  MartenText.reset_configuration!
+  # `_force: true` bypasses the post-boot `MartenText.frozen!` guard so
+  # specs that exercise the freeze contract (see
+  # `spec/marten_text/configuration_freeze_spec.cr`) don't leak a
+  # frozen singleton into the next example. Production code MUST NOT
+  # call `reset_configuration!` with `_force: true`.
+  MartenText.reset_configuration!(_force: true)
 end

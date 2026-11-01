@@ -103,7 +103,7 @@ describe MartenText do
 
       stored = NoteMarkdown.filter(record_type: "Note", record_id: note.pk, name: "body").first
       stored.should_not be_nil
-      stored.not_nil!.content.should eq "buffered content"
+      stored.try(&.content).should eq "buffered content"
     end
 
     it "buffers create_body! on an unsaved host and flushes it via after_save" do
@@ -117,7 +117,7 @@ describe MartenText do
 
       stored = NoteMarkdown.filter(record_type: "Note", record_id: note.pk, name: "body").first
       stored.should_not be_nil
-      stored.not_nil!.content.should eq "via create_body!"
+      stored.try(&.content).should eq "via create_body!"
     end
   end
 end

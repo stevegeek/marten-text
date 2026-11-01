@@ -7,21 +7,21 @@ describe MartenText do
   describe ".frozen! / .configure / .reset_configuration!" do
     it "allows configure before frozen!" do
       MartenText.frozen?.should be_false
-      MartenText.configure do |c|
-        c.syntax_theme = "monokai"
+      MartenText.configure do |config|
+        config.syntax_theme = "monokai"
       end
       MartenText.configuration.syntax_theme.should eq "monokai"
     end
 
     it "raises ConfigurationError on configure after frozen!" do
-      MartenText.configure do |c|
-        c.syntax_theme = "github"
+      MartenText.configure do |config|
+        config.syntax_theme = "github"
       end
       MartenText.frozen!
 
       expect_raises(MartenText::ConfigurationError, /locked/) do
-        MartenText.configure do |c|
-          c.syntax_theme = "monokai"
+        MartenText.configure do |config|
+          config.syntax_theme = "monokai"
         end
       end
 
@@ -37,8 +37,8 @@ describe MartenText do
     end
 
     it "reset_configuration!(_force: true) bypasses the freeze (test-helper path)" do
-      MartenText.configure do |c|
-        c.syntax_theme = "monokai"
+      MartenText.configure do |config|
+        config.syntax_theme = "monokai"
       end
       MartenText.frozen!
 
@@ -69,7 +69,7 @@ describe MartenText do
       MartenText.configuration.frozen?.should be_true
     end
 
-    {% for setter in %w(syntax_theme markd_options image_wrapper heading_anchor) %}
+    {% for setter in %w[syntax_theme markd_options image_wrapper heading_anchor] %}
       it "raises ConfigurationError on direct .{{ setter.id }}= after frozen! (R3)" do
         MartenText.frozen!
 
@@ -93,8 +93,8 @@ describe MartenText do
     end
 
     it "reset_configuration!(_force: true) un-freezes both the module flag and the instance" do
-      MartenText.configure do |c|
-        c.syntax_theme = "monokai"
+      MartenText.configure do |config|
+        config.syntax_theme = "monokai"
       end
       MartenText.frozen!
       MartenText.configuration.frozen?.should be_true
@@ -111,8 +111,8 @@ describe MartenText do
     end
 
     it "the post-freeze direct mutation attempt did not leak through" do
-      MartenText.configure do |c|
-        c.syntax_theme = "github"
+      MartenText.configure do |config|
+        config.syntax_theme = "github"
       end
       MartenText.frozen!
 

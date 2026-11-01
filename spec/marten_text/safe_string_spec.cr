@@ -42,8 +42,8 @@ describe MartenText::Renderable do
       # markd no longer strips raw HTML, marten-text refuses to
       # launder the output: the value comes back as a bare String so
       # the template engine's auto-escape kicks in by default.
-      MartenText.configure do |c|
-        c.markd_options = ::Markd::Options.new(smart: true, safe: false)
+      MartenText.configure do |config|
+        config.markd_options = ::Markd::Options.new(smart: true, safe: false)
       end
       MartenText.configuration.markd_options.safe?.should be_false
 

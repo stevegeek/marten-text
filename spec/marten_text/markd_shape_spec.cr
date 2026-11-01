@@ -31,8 +31,8 @@ describe MartenText::Renderer do
       # to `alt` before `src` (or adds an attribute between them), the
       # regex no-ops and the hook never fires.
       seen = [] of String
-      MartenText.configure do |c|
-        c.image_wrapper = ->(url : String, alt : String, _title : String?) {
+      MartenText.configure do |config|
+        config.image_wrapper = ->(url : String, alt : String, _title : String?) {
           seen << "#{url}|#{alt}"
           %(<figure data-marker="hooked"><img src="#{url}" alt="#{alt}"></figure>)
         }
@@ -50,8 +50,8 @@ describe MartenText::Renderer do
       # closing with no attributes; if markd ever adds attributes to
       # the opening tag, the regex no-ops.
       seen = [] of {String, String, String}
-      MartenText.configure do |c|
-        c.heading_anchor = ->(level : String, text : String, id : String) {
+      MartenText.configure do |config|
+        config.heading_anchor = ->(level : String, text : String, id : String) {
           seen << {level, text, id}
           %(<#{level} data-id="#{id}">#{text}</#{level}>)
         }

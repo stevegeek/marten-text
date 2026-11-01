@@ -24,13 +24,13 @@ describe MartenText::Configuration do
     end
 
     {
-      "data:text/html"         => "data:text/html,<script>alert(1)</script>",
-      "data:application/javascript" => "data:application/javascript,alert(1)",
-      "data:image/svg+xml"     => "data:image/svg+xml,<svg onload=alert(1)/>",
+      "data:text/html"                     => "data:text/html,<script>alert(1)</script>",
+      "data:application/javascript"        => "data:application/javascript,alert(1)",
+      "data:image/svg+xml"                 => "data:image/svg+xml,<svg onload=alert(1)/>",
       "data:image/bmp (not in allow-list)" => "data:image/bmp;base64,Qk0=",
-      "data: with no media type" => "data:,hello",
-      "javascript:"            => "javascript:alert(1)",
-      "vbscript:"              => "vbscript:msgbox(1)",
+      "data: with no media type"           => "data:,hello",
+      "javascript:"                        => "javascript:alert(1)",
+      "vbscript:"                          => "vbscript:msgbox(1)",
     }.each do |description, url|
       it "rejects #{description}" do
         MartenText::Configuration.safe_url?(url).should be_false

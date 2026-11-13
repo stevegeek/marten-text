@@ -20,3 +20,10 @@ dependencies:
 development_dependencies:
   sqlite3:
     github: crystal-lang/crystal-sqlite3
+  ameba:
+    github: crystal-ameba/ameba
+    version: ~> 1.7.0
+
+targets:
+  ameba:
+    main: lib/ameba/bin/ameba.cr
